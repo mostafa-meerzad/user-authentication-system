@@ -22,8 +22,6 @@ passport.use(
 app.post("/signup", async (req, res) => {
   // parse req.body to get needed fields
   const { username, password } = req.body;
-  console.log(username)
-  console.log(password)
   // check if user already exists
   const existingUser = users.find((user) => user.username === username);
 
@@ -47,8 +45,7 @@ app.post("/signup", async (req, res) => {
       expiresIn: "1h",
     });
     // send token in a cookie
-    // res.cookie("token", token, { httpOnly: true, secure: true });
-    console.log("token created")
+    res.cookie("token", token, { httpOnly: true, secure: true });
     res
       .status(201)
       .json({ message: "User created", userId: newUser.id, token });
@@ -61,7 +58,7 @@ app.post(
   "/login",
   passport.authenticate("local", { session: false }),
   (req, res) => {
-    const token = jwt.sign(req.body.userId, "my-app-secret", {
+    const token = jwt.sign({userId: req.body.userId}, "my-app-secret", {
       expiresIn: "1h",
     });
     res.cookie("token", token, { httpOnly: true });
