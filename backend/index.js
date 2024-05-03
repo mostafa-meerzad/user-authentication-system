@@ -19,6 +19,20 @@ passport.use(
   })
 );
 
+// authenticate middleware
+
+const authenticateToken = (req, res, next) => {
+  const token = req.cookies.token;
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, "my-app-secret", (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+
+// user signup route
 app.post("/signup", async (req, res) => {
   // parse req.body to get needed fields
   const { username, password } = req.body;
@@ -54,11 +68,12 @@ app.post("/signup", async (req, res) => {
   }
 });
 
+// user login route
 app.post(
   "/login",
   passport.authenticate("local", { session: false }),
   (req, res) => {
-    const token = jwt.sign({userId: req.body.userId}, "my-app-secret", {
+    const token = jwt.sign({ userId: req.body.userId }, "my-app-secret", {
       expiresIn: "1h",
     });
     res.cookie("token", token, { httpOnly: true });
@@ -66,6 +81,10 @@ app.post(
   }
 );
 
+// crate a protected route
+app.get("/dashboard", authenticateToken, (req, res) => {
+  res.json({ message: "Welcome to the dashboard" });
+});
 app.listen(PORT, () => {
   console.log("server listening on port: ", PORT);
 });
