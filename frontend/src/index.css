@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-[#242424];
+  @apply text-white;
+  display: grid;
+  place-content: center;
+  min-height: 100svh;
+}
+
+input {
+  @apply focus:outline-[3px] focus:outline-gray-300 w-full bg-transparent outline outline-1 rounded-md px-2 py-1;
+}
+
+button {
+  @apply border border-white rounded-md p-1;
+  @apply hover:bg-[#3b3b3b] active:scale-[.98] active:bg-[#3b3b3b];
+  /* border: 2px solid red; */
+}
