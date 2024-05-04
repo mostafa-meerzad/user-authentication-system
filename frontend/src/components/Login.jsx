@@ -1,10 +1,15 @@
 import { useState } from "react";
 import axios from "axios";
+import { useAuth } from "../AuthContext";
+import {useNavigate} from "react-router-dom";
 axios.defaults.withCredentials = true;
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
+  const {login} = useAuth()
+  const navigate = useNavigate()
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -14,6 +19,8 @@ const Login = () => {
         password,
       });
       console.log("this is the response: ", response.data);
+      login({username})
+      navigate("/dashboard")
     } catch (error) {
       // console.error("this is the error: ", error);
       console.log("this is the response: ", error.response.data);
