@@ -3,18 +3,23 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+const cors = require("cors");
+
 const app = express();
 const PORT = 3000;
 const users = [];
 
 app.use(express.json());
-
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 //configure passport's localStrategy
 passport.use(
-  new LocalStrategy((username, password, done) => {
+  new LocalStrategy(async (username, password, done) => {
     const user = users.find((user) => user.username === username);
     if (!user) return done(null, false);
-    if (!bcrypt.compare(password, user.password)) return done(null, false);
+    // if (!bcrypt.compareSync(password, user.password)) return done(null, false);
+    if (!(await bcrypt.compare(password, user.password))) {
+      return done(null, false);
+    }
     return done(null, user);
   })
 );
@@ -22,7 +27,8 @@ passport.use(
 // authenticate middleware
 
 const authenticateToken = (req, res, next) => {
-  const token = req.cookies.token;
+  const token = req.cookies?.token;
+  console.log(token);
   if (!token) return res.sendStatus(401);
 
   jwt.verify(token, "my-app-secret", (err, user) => {
