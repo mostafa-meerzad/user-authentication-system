@@ -1,16 +1,17 @@
 import { useState } from "react";
 import axios from "axios";
 import { useAuth } from "../AuthContext";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 axios.defaults.withCredentials = true;
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState(null);
+  const { login } = useAuth();
 
-  const {login} = useAuth()
-  const navigate = useNavigate()
-
+  const navigate = useNavigate(login);
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -19,27 +20,26 @@ const Login = () => {
         password,
       });
       console.log("this is the response: ", response.data);
-      login({username})
-      navigate("/dashboard")
+      login({ username });
+      setLoginError(null);
+      navigate("/dashboard");
     } catch (error) {
       // console.error("this is the error: ", error);
       console.log("this is the response: ", error.response.data);
-    }
-  };
-
-  const handleDashboardRequest = async () => {
-    try {
-      const response = await axios.get("http://localhost:3000/dashboard");
-      console.log(response.data);
-    } catch (error) {
-      console.error(error);
+      console.log("this is the response: ", error.response.status);
+      setLoginError(error);
+      setTimeout(() => {
+        setLoginError(null);
+      }, 2000);
     }
   };
 
   return (
     <form
       onSubmit={handleLogin}
-      className="grid content-center gap-3 min-h-[20rem] max-w-md p-4 border border-gray-600 rounded-lg"
+      className={`grid content-center gap-3 min-h-[20rem] max-w-md p-4 border border-gray-600 rounded-lg ${
+        loginError && "border-red-400"
+      }`}
     >
       <h1 className="col-start-1 col-end-[-1] text-center text-4xl py-4">
         Login
@@ -55,9 +55,10 @@ const Login = () => {
       <button type="submit" onClick={handleLogin}>
         Login
       </button>
-      <button type="button" onClick={handleDashboardRequest}>
-        Access Dashboard
-      </button>
+      <div className="flex items-center justify-around ">
+        <button onClick={() => navigate("/signup")}>Sign up</button>
+        <button onClick={() => navigate("/")}>Home</button>
+      </div>
     </form>
   );
 };
